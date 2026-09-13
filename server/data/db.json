@@ -95309,138 +95309,18 @@
   "users": [
     {
       "id": "USR-ADMIN-01",
-      "name": "Bosh Administrator",
+      "name": "Administrator",
+      "email": "nsbxan@gmail.com",
       "phone": "+998 90 123 45 67",
-      "email": "admin@textilepro.uz",
-      "password": "admin123",
+      "password": "admin",
       "role": "admin",
       "canEdit": true,
       "allowedTabs": [
         "*"
       ],
       "status": "active",
-      "createdAt": "2026-09-01T08:00:00.000Z"
-    },
-    {
-      "id": "ID-2026-0002",
-      "name": "Javlon Saidov",
-      "phone": "+998 90 999 88 77",
-      "email": "operator_1789326963752@gmail.com",
-      "password": "pass123",
-      "role": "staff",
-      "canEdit": true,
-      "allowedTabs": [
-        "weaving",
-        "rolls"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Javlon%20Saidov",
-      "createdAt": "2026-09-13T19:16:03.773Z",
-      "updatedAt": "2026-09-13T19:16:03.845Z"
-    },
-    {
-      "id": "ID-2026-0003",
-      "name": "Farhod Rahimov",
-      "phone": "+998 -- --- -- --",
-      "email": "director.textile@gmail.com",
-      "password": "google_oauth_goog_123456",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Farhod%20Rahimov",
-      "authProvider": "google",
-      "createdAt": "2026-09-13T19:16:03.954Z",
-      "updatedAt": "2026-09-13T19:16:03.954Z"
-    },
-    {
-      "id": "ID-2026-0004",
-      "name": "Nasibullo",
-      "phone": "+998 -- --- -- --",
-      "email": "nasibullo.textile@gmail.com",
-      "password": "google_oauth_goog_1789327046040",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Nasibullo",
-      "authProvider": "google",
-      "createdAt": "2026-09-13T19:17:26.044Z",
-      "updatedAt": "2026-09-13T19:17:26.044Z"
-    },
-    {
-      "id": "ID-2026-0005",
-      "name": "Sanjar Valiyev",
-      "phone": "+998 91 123 45 67",
-      "email": "operator_1789334319287@gmail.com",
-      "password": "secretpassword",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sanjar%20Valiyev",
-      "createdAt": "2026-09-13T21:18:39.746Z",
-      "updatedAt": "2026-09-13T21:18:39.746Z"
-    },
-    {
-      "id": "ID-2026-0006",
-      "name": "Sanjar Valiyev",
-      "phone": "+998 91 7696747",
-      "email": "operator_1789334816456@gmail.com",
-      "password": "secretpassword",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sanjar%20Valiyev",
-      "createdAt": "2026-09-13T21:26:56.597Z",
-      "updatedAt": "2026-09-13T21:26:56.597Z"
-    },
-    {
-      "id": "ID-2026-0007",
-      "name": "Test Imperia",
-      "phone": "+998 90 1775683",
-      "email": "test_imp_1789337442337@gmail.com",
-      "password": "password123",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Test%20Imperia",
-      "createdAt": "2026-09-13T22:10:47.552Z",
-      "updatedAt": "2026-09-13T22:10:47.553Z"
-    },
-    {
-      "id": "ID-2026-0008",
-      "name": "Xodim",
-      "phone": "+998 93 9267922",
-      "email": "emp_1789337878553@gmail.com",
-      "password": "pass",
-      "role": "staff",
-      "canEdit": false,
-      "allowedTabs": [
-        "dashboard",
-        "fabrics"
-      ],
-      "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Xodim",
-      "createdAt": "2026-09-13T22:17:58.769Z",
-      "updatedAt": "2026-09-13T22:17:58.770Z"
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Admin",
+      "createdAt": "2026-09-13T22:30:48.971Z"
     }
   ]
 }

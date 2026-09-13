@@ -199,64 +199,6 @@ router.post('/login', (req, res) => {
   }
 });
 
-// 3. Google hisobi orqali kirish / tezkor ro'yxatdan o'tish
-router.post('/google', (req, res) => {
-  try {
-    const { email, name, picture, googleId } = req.body;
-
-    if (!email || !email.trim()) {
-      return res.status(400).json({ success: false, message: "Google email manzili topilmadi" });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    let user = db.find('users', u => (u.email || '').toLowerCase() === cleanEmail)[0];
-
-    if (user) {
-      if (user.status === 'blocked') {
-        return res.status(403).json({ 
-          success: false, 
-          message: "Sizning hisobingiz administrator tomonidan bloklangan." 
-        });
-      }
-      // Agar rasmi yoki googleId yangilangan bo'lsa
-      if (picture && !user.avatar) {
-        db.update('users', user.id, { avatar: picture });
-        user = db.findById('users', user.id);
-      }
-    } else {
-      // Yangi Google foydalanuvchisini ro'yxatdan o'tkazish
-      const allUsers = db.get('users');
-      const isFirstUser = allUsers.length === 0;
-
-      user = db.insert('users', {
-        name: name || cleanEmail.split('@')[0],
-        phone: "+998 -- --- -- --",
-        email: cleanEmail,
-        password: `google_oauth_${googleId || Date.now()}`,
-        role: isFirstUser ? 'admin' : 'staff',
-        canEdit: isFirstUser ? true : false,
-        allowedTabs: isFirstUser ? ['*'] : ['dashboard', 'fabrics'],
-        status: 'active',
-        avatar: picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || cleanEmail)}`,
-        authProvider: 'google',
-        createdAt: new Date().toISOString()
-      });
-    }
-
-    res.json({
-      success: true,
-      message: `Google hisobingiz orqali muvaffaqiyatli kirdingiz!`,
-      data: {
-        user: sanitizeUser(user),
-        token: `erp_token_${user.id}_${Date.now()}`
-      }
-    });
-  } catch (err) {
-    console.error("Google Auth error:", err);
-    res.status(500).json({ success: false, message: "Google orqali kirishda xatolik yuz berdi" });
-  }
-});
-
 // 4. Joriy foydalanuvchi ma'lumotlarini yangilash / olish (/me)
 router.get('/me', (req, res) => {
   try {
