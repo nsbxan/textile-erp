@@ -34,7 +34,6 @@ export default function AuthPage() {
   // Register form
   const [regStep, setRegStep] = useState('form'); // 'form' | 'code'
   const [verificationCode, setVerificationCode] = useState('');
-  const [incomingEmailNotice, setIncomingEmailNotice] = useState(null);
   const [regForm, setRegForm] = useState({
     name: '',
     phone: '+998 ',
@@ -104,26 +103,12 @@ export default function AuthPage() {
       });
 
       if (res.success) {
-        setIncomingEmailNotice({
-          email: regForm.email.trim().toLowerCase(),
-          code: res.code,
-          emailSent: res.emailSent,
-          reason: res.reason
-        });
         setRegStep('code');
-        if (res.emailSent) {
-          notify(
-            "Emailga kod yuborildi",
-            `${regForm.email} pochtangizga maxfiy tasdiqlash kodi yuborildi. Pochtani tekshiring!`,
-            'success'
-          );
-        } else {
-          notify(
-            "Tasdiqlash kodi yaratildi",
-            `Maxfiy kod ekranda va server konsolida ko'rsatildi`,
-            'info'
-          );
-        }
+        notify(
+          "Emailga kod yuborildi",
+          `${regForm.email} pochtangizga maxfiy tasdiqlash kodi yuborildi. Pochtani tekshiring!`,
+          'success'
+        );
       }
     } catch (err) {
       setErrorMsg(err.message || "Tasdiqlash kodini yuborishda xatolik");
@@ -446,46 +431,18 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {/* Kelgan xabar holati */}
-              {incomingEmailNotice && (
-                incomingEmailNotice.emailSent ? (
-                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs space-y-1.5">
-                    <div className="flex items-center gap-2 font-bold text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>{lang === 'ru' ? "Код отправлен на вашу почту!" : "Tasdiqlash kodi emailingizga yuborildi!"}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
-                      {lang === 'ru'
-                        ? `Проверьте входящие сообщения (и папку «Спам») на адресе ${incomingEmailNotice.email} и введите 6-значный код ниже.`
-                        : `${incomingEmailNotice.email} pochtangizni oching (agar xat ko'rinmasa Spam papkasini ham tekshiring) va kelgan 6 xonali kodni pastga kiriting.`}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold flex items-center gap-1.5 text-amber-300">
-                        <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                        {lang === 'ru' ? "Демо-код подтверждения:" : "Demo tasdiqlash kodi:"}
-                      </span>
-                      <span className="font-mono font-black text-sm px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-100 border border-amber-500/40">
-                        {incomingEmailNotice.code}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
-                      {lang === 'ru'
-                        ? "SMTP почтовый сервер еще не подключен в .env, поэтому код показан здесь для продолжения."
-                        : "Serverda hali haqiqiy Gmail SMTP (App Password) ulanmaganligi sababli kod to'xtab qolmaslik uchun shu yerda berildi."}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setVerificationCode(incomingEmailNotice.code)}
-                      className="text-[11px] text-amber-400 hover:text-amber-200 underline font-black block cursor-pointer"
-                    >
-                      {lang === 'ru' ? `Вставить код автоматически (${incomingEmailNotice.code})` : `Kodni avtomatik kiritish (${incomingEmailNotice.code})`}
-                    </button>
-                  </div>
-                )
-              )}
+              {/* Email yuborilganlik bildirishnomasi */}
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{lang === 'ru' ? "Секретный код отправлен на вашу почту!" : "Maxfiy tasdiqlash kodi pochtangizga yuborildi!"}</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  {lang === 'ru'
+                    ? `Мы отправили 6-значный проверочный код на адрес ${regForm.email}. Проверьте папку «Входящие» (а также «Спам») и введите полученный код ниже.`
+                    : `Biz ${regForm.email} pochtangizga 6 xonali maxfiy tasdiqlash kodini yubordik. Pochtani (Spam papkasini ham) oching va kelgan kodni pastga kiriting.`}
+                </p>
+              </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 text-center mb-2">

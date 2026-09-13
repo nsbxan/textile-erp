@@ -53,16 +53,12 @@ router.post('/send-code', async (req, res) => {
     if (mailRes.emailSent) {
       res.json({
         success: true,
-        emailSent: true,
         message: `Maxfiy tasdiqlash kodi ${cleanEmail} emailiga yuborildi! Pochtani (Spam papkasini ham) tekshiring.`
       });
     } else {
-      res.json({
-        success: true,
-        emailSent: false,
-        reason: mailRes.reason || mailRes.error,
-        code: code, // SMTP sozlanmagan bo'lsa tizim to'xtab qolmasligi uchun ekranda ko'rsatiladi
-        message: `Pochta xizmati (SMTP) hali to'liq ulanmagan. Kod ekranda ko'rsatildi.`
+      res.status(400).json({
+        success: false,
+        message: `Emailga maxfiy kodni yuborib bo'lmadi: ${mailRes.error || mailRes.reason || "Pochta xatosi"}. Iltimos, emailingizni tekshirib qaytadan urinib ko'ring.`
       });
     }
   } catch (err) {
