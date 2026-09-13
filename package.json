@@ -1,0 +1,17 @@
+{
+  "name": "textile-fabric-erp",
+  "version": "1.0.0",
+  "description": "To'qimachilik, matolar va kiyim-kechak ishlab chiqarish hamda savdosi ERP tizimi (QR Kod, Kamchiliklar nazorati, Sklad, Moliya)",
+  "main": "server/index.js",
+  "scripts": {
+    "server": "node server/index.js",
+    "client": "npm --prefix client run dev",
+    "dev": "node dev.js",
+    "install-all": "npm --prefix server install && npm --prefix client install",
+    "build": "npm --prefix server install && npm --prefix client install && npm --prefix client run build",
+    "start": "node server/index.js"
+  },
+  "keywords": ["erp", "textile", "fabric", "qr-code", "manufacturing", "uzbekistan"],
+  "author": "Antigravity ERP",
+  "license": "MIT"
+}

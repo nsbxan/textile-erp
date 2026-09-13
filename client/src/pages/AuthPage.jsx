@@ -1,0 +1,549 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import {
+  Building2,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Sparkles,
+  ShieldCheck,
+  ArrowRight,
+  Globe,
+  LogIn,
+  UserPlus
+} from 'lucide-react';
+
+export default function AuthPage() {
+  const { login, register, loginWithGoogle, lang, setLang, notify } = useApp();
+
+  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Login form
+  const [loginInput, setLoginInput] = useState('admin@textilepro.uz');
+  const [loginPass, setLoginPass] = useState('admin123');
+
+  // Register form
+  const [regForm, setRegForm] = useState({
+    name: '',
+    phone: '+998 ',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  // Google Simulyatsiya Modali
+  const [googleModalOpen, setGoogleModalOpen] = useState(false);
+  const [googleCustomEmail, setGoogleCustomEmail] = useState('');
+  const [googleCustomName, setGoogleCustomName] = useState('');
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (!loginInput.trim()) {
+      setErrorMsg(lang === 'ru' ? "Введите email или номер телефона" : "Email yoki telefon raqamingizni kiriting");
+      return;
+    }
+    if (!loginPass) {
+      setErrorMsg(lang === 'ru' ? "Введите пароль" : "Parolingizni kiriting");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await login(loginInput.trim(), loginPass);
+    } catch (err) {
+      setErrorMsg(err.message || "Kirishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!regForm.name.trim()) {
+      setErrorMsg(lang === 'ru' ? "Введите Ф.И.О." : "Ism va familiyangizni to'liq kiriting");
+      return;
+    }
+    if (!regForm.phone.trim() || regForm.phone.trim().length < 9) {
+      setErrorMsg(lang === 'ru' ? "Введите корректный номер телефона" : "To'g'ri telefon raqam kiriting (masalan: +998 90 123 45 67)");
+      return;
+    }
+    if (!regForm.email.trim() || !regForm.email.includes('@')) {
+      setErrorMsg(lang === 'ru' ? "Введите корректный email (gmail)" : "To'g'ri email (yoki gmail) manzil kiriting");
+      return;
+    }
+    if (!regForm.password || regForm.password.length < 4) {
+      setErrorMsg(lang === 'ru' ? "Пароль должен быть не менее 4 символов" : "Parol kamida 4 ta belgidan iborat bo'lsin");
+      return;
+    }
+    if (regForm.password !== regForm.confirmPassword) {
+      setErrorMsg(lang === 'ru' ? "Пароли не совпадают" : "Kiritilgan parollar bir-biriga mos kelmadi");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await register({
+        name: regForm.name.trim(),
+        phone: regForm.phone.trim(),
+        email: regForm.email.trim().toLowerCase(),
+        password: regForm.password
+      });
+    } catch (err) {
+      setErrorMsg(err.message || "Ro'yxatdan o'tishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async (email, name) => {
+    try {
+      setLoading(true);
+      setGoogleModalOpen(false);
+      await loginWithGoogle({
+        email: email.trim().toLowerCase(),
+        name: name || email.split('@')[0],
+        picture: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || email)}`,
+        googleId: `goog_${Date.now()}`
+      });
+    } catch (err) {
+      setErrorMsg(err.message || "Google orqali kirishda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-950 p-4 sm:p-6 relative overflow-hidden font-sans text-slate-100">
+      {/* Orqa fon nur effekti */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-teal-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Yuqori til tanlash */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-2xl p-1 shadow-lg backdrop-blur-md z-10">
+        <button
+          onClick={() => setLang('lat')}
+          className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all ${
+            lang === 'lat' ? 'bg-teal-500 text-slate-950 font-black shadow-xs' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          🇺🇿 Lotin
+        </button>
+        <button
+          onClick={() => setLang('cyr')}
+          className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all ${
+            lang === 'cyr' ? 'bg-teal-500 text-slate-950 font-black shadow-xs' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          🇺🇿 Кирилл
+        </button>
+        <button
+          onClick={() => setLang('ru')}
+          className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all ${
+            lang === 'ru' ? 'bg-teal-500 text-slate-950 font-black shadow-xs' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          🇷🇺 Русский
+        </button>
+      </div>
+
+      <div className="w-full max-w-md my-auto relative z-10">
+        {/* Logo va Tizim Nomi */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-teal-400 text-slate-950 shadow-xl shadow-teal-500/20 mb-3 transform hover:scale-105 transition-transform duration-300">
+            <Building2 className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            TextilePro Uzbekistan
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
+            {lang === 'ru'
+              ? "Умная ERP система текстильного производства и торговли"
+              : lang === 'cyr'
+              ? "Тўқимачилик, бўёқхона ва мато савдоси ERP тизими"
+              : "To'qimachilik, bo'yoqxona va mato savdosi ERP tizimi"}
+          </p>
+        </div>
+
+        {/* Asosiy Kartochka */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+          {/* Kirish / Ro'yxatdan o'tish Tablari */}
+          <div className="flex p-1 bg-slate-950/80 rounded-2xl border border-slate-800">
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setErrorMsg(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'login'
+                  ? 'bg-teal-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{lang === 'ru' ? "Войти" : lang === 'cyr' ? "Кириш" : "Kirish"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('register'); setErrorMsg(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'register'
+                  ? 'bg-teal-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>{lang === 'ru' ? "Регистрация" : lang === 'cyr' ? "Рўйхатдан ўтиш" : "Ro'yxatdan o'tish"}</span>
+            </button>
+          </div>
+
+          {/* Xatolik xabari */}
+          {errorMsg && (
+            <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold animate-in fade-in zoom-in duration-200">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {/* 1. KIRISH FORMASI */}
+          {mode === 'login' && (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  {lang === 'ru' ? "Email или Номер телефона" : lang === 'cyr' ? "Email ёки Телефон рақами" : "Email yoki Telefon raqami"}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={loginInput}
+                    onChange={e => setLoginInput(e.target.value)}
+                    placeholder={lang === 'ru' ? "admin@textilepro.uz или +998..." : "admin@textilepro.uz yoki +998..."}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  {lang === 'ru' ? "Пароль" : lang === 'cyr' ? "Парол" : "Parol"}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={loginPass}
+                    onChange={e => setLoginPass(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? (
+                  <span>{lang === 'ru' ? "Вход в систему..." : "Kirilmoqda..."}</span>
+                ) : (
+                  <>
+                    <span>{lang === 'ru' ? "Войти в систему" : lang === 'cyr' ? "Тизимга кириш" : "Tizimga kirish"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* 2. RO'YXATDAN O'TISH FORMASI */}
+          {mode === 'register' && (
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  {lang === 'ru' ? "Ф.И.О. (Имя и Фамилия)" : lang === 'cyr' ? "Ф.И.Ш. (Исм ва Фамилия)" : "F.I.Sh. (Ism va Familiya)"}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={regForm.name}
+                    onChange={e => setRegForm({ ...regForm, name: e.target.value })}
+                    placeholder="Alisher Valiyev"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  {lang === 'ru' ? "Номер телефона" : lang === 'cyr' ? "Телефон рақами" : "Telefon raqami"}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="tel"
+                    value={regForm.phone}
+                    onChange={e => setRegForm({ ...regForm, phone: e.target.value })}
+                    placeholder="+998 90 123 45 67"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">
+                  {lang === 'ru' ? "Email адрес (Gmail или др.)" : lang === 'cyr' ? "Email манзили (Gmail ва б.)" : "Email manzili (Gmail yoki boshqa)"}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    value={regForm.email}
+                    onChange={e => setRegForm({ ...regForm, email: e.target.value })}
+                    placeholder="misol@gmail.com"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    {lang === 'ru' ? "Пароль" : "Parol"}
+                  </label>
+                  <input
+                    type="password"
+                    value={regForm.password}
+                    onChange={e => setRegForm({ ...regForm, password: e.target.value })}
+                    placeholder="••••••"
+                    className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    {lang === 'ru' ? "Повторите" : "Tasdiqlang"}
+                  </label>
+                  <input
+                    type="password"
+                    value={regForm.confirmPassword}
+                    onChange={e => setRegForm({ ...regForm, confirmPassword: e.target.value })}
+                    placeholder="••••••"
+                    className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs text-white focus:outline-none focus:border-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+              >
+                {loading ? (
+                  <span>{lang === 'ru' ? "Создание аккаунта..." : "Yaratilmoqda..."}</span>
+                ) : (
+                  <>
+                    <span>{lang === 'ru' ? "Зарегистрироваться" : lang === 'cyr' ? "Рўйхатдан ўтиш" : "Ro'yxatdan o'tish"}</span>
+                    <CheckCircle2 className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* AJRATUVCHI CHIZIQ */}
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-800 w-full" />
+            <span className="bg-slate-900 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              {lang === 'ru' ? "Или через" : lang === 'cyr' ? "Ёки" : "Yoki"}
+            </span>
+            <div className="border-t border-slate-800 w-full" />
+          </div>
+
+          {/* GOOGLE ORQALI KIRISH / RO'YXATDAN O'TISH */}
+          <button
+            type="button"
+            onClick={() => setGoogleModalOpen(true)}
+            className="w-full py-2.5 px-4 rounded-2xl bg-slate-950 hover:bg-slate-800/80 border border-slate-700/80 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all cursor-pointer shadow-xs active:scale-98"
+          >
+            {/* Google Icon SVG */}
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span>
+              {mode === 'login'
+                ? (lang === 'ru' ? "Войти через Google" : lang === 'cyr' ? "Google орқали кириш" : "Google orqali kirish")
+                : (lang === 'ru' ? "Регистрация через Google" : lang === 'cyr' ? "Google орқали рўйхатдан ўтиш" : "Google orqali ro'yxatdan o'tish")}
+            </span>
+          </button>
+
+          {/* TEZKOR DEMO ADMINISTRATOR TUGMASI */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginInput('admin@textilepro.uz');
+                setLoginPass('admin123');
+                setMode('login');
+              }}
+              className="w-full text-center text-[11px] text-teal-400 hover:text-teal-300 font-bold flex items-center justify-center gap-1.5 py-1.5 rounded-xl hover:bg-teal-500/10 transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+              <span>
+                {lang === 'ru'
+                  ? "Войти как Главный Администратор (admin@textilepro.uz)"
+                  : "Bosh Administrator sifatida to'ldirish (admin@textilepro.uz)"}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Xavfsizlik va Ma'lumot */}
+        <div className="text-center mt-4 text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <span>
+            {lang === 'ru'
+              ? "Права доступа и редактирование контролируются Администратором (RBAC)"
+              : "Tizimda tahrirlash va ko'rish huquqlari Administrator tomonidan boshqariladi"}
+          </span>
+        </div>
+      </div>
+
+      {/* GOOGLE SIGN IN POPUP MODAL */}
+      {googleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <h3 className="text-sm font-black text-white">Google bilan davom etish</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGoogleModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              TextilePro ERP tizimiga o'zingizning Google hisobingiz orqali bir bosishda kiring:
+            </p>
+
+            {/* Tezkor Google hisoblar */}
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => handleGoogleAuth('nasibullo.textile@gmail.com', 'Nasibullo')}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-left transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-500 text-white font-black text-xs flex items-center justify-center">
+                  N
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white truncate">Nasibullo (Google)</p>
+                  <p className="text-[11px] text-slate-400 truncate">nasibullo.textile@gmail.com</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleGoogleAuth('admin.director@gmail.com', 'Bosh Direktor')}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-left transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white font-black text-xs flex items-center justify-center">
+                  B
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white truncate">Bosh Direktor</p>
+                  <p className="text-[11px] text-slate-400 truncate">admin.director@gmail.com</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Boshqa shaxsiy Gmail kiritish */}
+            <div className="pt-2 border-t border-slate-800 space-y-2">
+              <label className="text-[11px] font-bold text-slate-400 block">
+                Yoki o'z Google Gmail manzilingizni kiriting:
+              </label>
+              <input
+                type="text"
+                value={googleCustomName}
+                onChange={e => setGoogleCustomName(e.target.value)}
+                placeholder="Ismingiz (masalan: Rustam)"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+              <input
+                type="email"
+                value={googleCustomEmail}
+                onChange={e => setGoogleCustomEmail(e.target.value)}
+                placeholder="sizning.nomingiz@gmail.com"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!googleCustomEmail || !googleCustomEmail.includes('@')) {
+                    notify("Xatolik", "Google email manzilini to'g'ri kiriting", "error");
+                    return;
+                  }
+                  handleGoogleAuth(googleCustomEmail, googleCustomName);
+                }}
+                className="w-full py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs rounded-xl shadow-md cursor-pointer"
+              >
+                Davom etish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

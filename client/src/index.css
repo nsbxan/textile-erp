@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-200 font-sans antialiased selection:bg-teal-500 selection:text-white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Light & Dark Solid Clean Background */
+body:not(.dark) {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+body.dark {
+  background-color: #0b0f17;
+  color: #f8fafc;
+}
+
+/* Clean Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+body:not(.dark) ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Crisp Clean Modern Cards (No fuzzy blur, pure crystal clear) */
+.ios-glass-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-glass-card:hover {
+  background: #ffffff;
+  border-color: #14b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+.ios-glass-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark Theme Cards & Panels */
+.dark .ios-glass-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .ios-glass-card:hover {
+  background: #162032;
+  border-color: #2dd4bf;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7), 0 0 20px -5px rgba(45, 212, 191, 0.2);
+}
+
+.dark .ios-glass-panel {
+  background: #111827;
+  border: 1px solid #1f2937;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Legacy alias mappings */
+.glass-panel {
+  @apply ios-glass-panel;
+}
+.glass-card {
+  @apply ios-glass-card;
+}
+
+/* Clean Pill Switcher */
+.ios-segmented-control {
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .ios-segmented-control {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+/* Print Specific Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .no-print, nav, aside, .sidebar, .navbar, button, .modal-backdrop-blur {
+    display: none !important;
+  }
+
+  .printable-area {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+
