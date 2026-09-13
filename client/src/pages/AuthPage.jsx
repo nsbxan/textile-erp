@@ -34,7 +34,7 @@ export default function AuthPage() {
 
   // Register form
   const [regForm, setRegForm] = useState({
-    name: '',
+    name: 'Polat Alemdar',
     phone: '+998 ',
     email: '',
     password: '',
@@ -282,7 +282,7 @@ export default function AuthPage() {
                     type="text"
                     value={regForm.name}
                     onChange={e => setRegForm({ ...regForm, name: e.target.value })}
-                    placeholder="Alisher Valiyev"
+                    placeholder="Polat Alemdar"
                     className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>

@@ -27,7 +27,7 @@ const defaultData = {
   users: [
     {
       id: "USR-ADMIN-01",
-      name: "Bosh Administrator",
+      name: "Polat Alemdar",
       phone: "+998 90 123 45 67",
       email: "admin@textilepro.uz",
       password: "admin123",
