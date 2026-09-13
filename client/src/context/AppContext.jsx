@@ -78,6 +78,21 @@ export function AppProvider({ children }) {
       .catch(err => console.error("Sozlamalarni yuklash xatosi:", err));
   }, [refreshSignal]);
 
+  // Saytga tashrif va sessiyani xavfsizlik jurnaliga qayd qilish
+  useEffect(() => {
+    try {
+      const screenResolution = `${window.screen.width}x${window.screen.height}`;
+      const platform = navigator.userAgentData?.platform || navigator.platform || 'Noma\'lum';
+      api.post('/auth/record-visit', {
+        userId: currentUser?.id || null,
+        userName: currentUser?.name || null,
+        userEmail: currentUser?.email || null,
+        screenResolution,
+        platform
+      }).catch(() => {});
+    } catch (_) {}
+  }, [currentUser?.id]);
+
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };

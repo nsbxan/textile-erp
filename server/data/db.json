@@ -95322,5 +95322,91 @@
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Admin",
       "createdAt": "2026-09-13T22:30:48.971Z"
     }
+  ],
+  "access_logs": [
+    {
+      "id": "LOG-1789339266763-638",
+      "timestamp": "2026-09-13T22:41:06.763Z",
+      "formattedTime": "14/09/2026, 03:41:06",
+      "user": {
+        "id": "USR-ADMIN-01",
+        "name": "Administrator",
+        "email": "nsbxan@gmail.com"
+      },
+      "action": "Tizimga kirish",
+      "status": "Muvaffaqiyatli",
+      "ip": "127.0.0.1",
+      "device": "Kompyuter (PC / Noutbuk)",
+      "deviceType": "desktop",
+      "os": "Windows 10 / 11",
+      "browser": "Google Chrome",
+      "location": "Mahalliy Qurilma (Localhost / Server)",
+      "path": "/api/auth/login",
+      "method": "POST",
+      "details": "Hisob turi: admin"
+    },
+    {
+      "id": "LOG-1789339266714-558",
+      "timestamp": "2026-09-13T22:41:06.680Z",
+      "formattedTime": "14/09/2026, 03:41:06",
+      "user": {
+        "id": null,
+        "name": "Notanish Shaxs",
+        "email": "stranger@gmail.com"
+      },
+      "action": "Ro'yxatdan o'tish urinishi",
+      "status": "Xatolik (Noto'g'ri kod)",
+      "ip": "84.54.72.19",
+      "device": "Apple iPhone",
+      "deviceType": "mobile",
+      "os": "iOS 17.5",
+      "browser": "Apple Safari",
+      "location": "Internet (Tashqi IP manzil)",
+      "path": "/api/auth/register",
+      "method": "POST",
+      "details": "Maxfiy kod 'imperia' xato kiritildi"
+    },
+    {
+      "id": "LOG-1789339232044-748",
+      "timestamp": "2026-09-13T22:40:32.043Z",
+      "formattedTime": "14/09/2026, 03:40:32",
+      "user": {
+        "id": "USR-ADMIN-01",
+        "name": "Administrator",
+        "email": "nsbxan@gmail.com"
+      },
+      "action": "Tizimga kirish",
+      "status": "Muvaffaqiyatli",
+      "ip": "::1",
+      "device": "Kompyuter (PC / Noutbuk)",
+      "deviceType": "desktop",
+      "os": "Windows 10 / 11",
+      "browser": "Google Chrome",
+      "location": "Mahalliy Qurilma (Localhost / Server)",
+      "path": "/api/auth/login",
+      "method": "POST",
+      "details": "Hisob turi: admin"
+    },
+    {
+      "id": "LOG-1789339231996-315",
+      "timestamp": "2026-09-13T22:40:31.960Z",
+      "formattedTime": "14/09/2026, 03:40:31",
+      "user": {
+        "id": null,
+        "name": "Notanish Shaxs",
+        "email": "stranger@gmail.com"
+      },
+      "action": "Ro'yxatdan o'tish urinishi",
+      "status": "Xatolik (Noto'g'ri kod)",
+      "ip": "84.54.72.19",
+      "device": "Apple iPhone",
+      "deviceType": "mobile",
+      "os": "macOS",
+      "browser": "Apple Safari",
+      "location": "Internet (Tashqi IP manzil)",
+      "path": "/api/auth/register",
+      "method": "POST",
+      "details": "Maxfiy kod 'imperia' xato kiritildi"
+    }
   ]
 }

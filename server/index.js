@@ -22,6 +22,7 @@ import employeesRouter from './routes/employees.js';
 import dashboardRouter from './routes/dashboard.js';
 import settingsRouter from './routes/settings.js';
 import authRouter from './routes/auth.js';
+import { logAccess } from './auditHelper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,6 +71,16 @@ const clientDist = path.join(__dirname, '../client/dist');
 app.use(express.static(clientDist));
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
+  
+  // Faqat asosiy sahifa ochilganda log yozish (fayllar uchun emas)
+  if (!req.path.includes('.')) {
+    logAccess(req, {
+      action: "Web App ochildi",
+      status: "Tashrif",
+      details: `Sahifa manzili: ${req.path}`
+    });
+  }
+
   res.sendFile(path.join(clientDist, 'index.html'), (err) => {
     if (err) {
       res.json({

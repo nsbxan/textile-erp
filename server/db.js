@@ -88,6 +88,7 @@ class JSONDatabase {
             }
           ];
         }
+        if (!this.cache.access_logs) this.cache.access_logs = [];
         if (!this.cache.settings.usdExchangeRate) this.cache.settings.usdExchangeRate = 12850;
       } else {
         this.cache = JSON.parse(JSON.stringify(defaultData));
@@ -113,6 +114,12 @@ class JSONDatabase {
     if (!this.cache[collectionName]) {
       this.cache[collectionName] = [];
     }
+    return this.cache[collectionName];
+  }
+
+  set(collectionName, data) {
+    this.cache[collectionName] = data;
+    this.save();
     return this.cache[collectionName];
   }
 

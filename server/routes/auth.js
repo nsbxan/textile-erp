@@ -1,6 +1,7 @@
 import express from 'express';
 import { db } from '../db.js';
 import { sendVerificationEmail, getSmtpConfig } from '../emailHelper.js';
+import { logAccess } from '../auditHelper.js';
 
 const router = express.Router();
 
@@ -87,6 +88,13 @@ router.post('/register', (req, res) => {
     // Maxfiy kodni tekshirish (imperia)
     const inputCode = String(code || '').trim().toLowerCase();
     if (inputCode !== 'imperia') {
+      logAccess(req, {
+        action: "Ro'yxatdan o'tish urinishi",
+        status: "Xatolik (Noto'g'ri kod)",
+        userEmail: email,
+        userName: name,
+        details: "Maxfiy kod 'imperia' xato kiritildi"
+      });
       return res.status(400).json({ 
         success: false, 
         message: "Kiritilgan maxfiy kod noto'g'ri! Tizimga kirish uchun to'g'ri maxfiy kodni yozing." 
@@ -103,6 +111,13 @@ router.post('/register', (req, res) => {
     );
 
     if (existing.length > 0) {
+      logAccess(req, {
+        action: "Ro'yxatdan o'tish urinishi",
+        status: "Xatolik (Takroriy hisob)",
+        userEmail: cleanEmail,
+        userName: name,
+        details: "Email yoki telefon avval ro'yxatdan o'tgan"
+      });
       return res.status(400).json({ 
         success: false, 
         message: "Ushbu email yoki telefon raqami allaqachon ro'yxatdan o'tgan" 
@@ -119,12 +134,19 @@ router.post('/register', (req, res) => {
       password: password, // Lokal ERP tizimi uchun
       role: isFirstUser ? 'admin' : 'staff',
       canEdit: isFirstUser ? true : false,
-      // Standart bo'limlar: yangi xodim dastlab Dashboard va Matolar katalogini ko'ra oladi,
-      // qolganini esa Administrator beradi
       allowedTabs: isFirstUser ? ['*'] : ['dashboard', 'fabrics'],
       status: 'active',
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
       createdAt: new Date().toISOString()
+    });
+
+    logAccess(req, {
+      action: "Ro'yxatdan o'tish",
+      status: "Muvaffaqiyatli",
+      userEmail: cleanEmail,
+      userName: newUser.name,
+      userId: newUser.id,
+      details: isFirstUser ? "Bosh Administrator sifatida ro'yxatdan o'tdi" : "Xodim sifatida ro'yxatdan o'tdi"
     });
 
     res.json({
@@ -165,6 +187,12 @@ router.post('/login', (req, res) => {
     })[0];
 
     if (!user) {
+      logAccess(req, {
+        action: "Tizimga kirish urinishi",
+        status: "Xatolik (Topilmadi)",
+        userEmail: loginInput,
+        details: "Bunday email yoki telefonli hisob topilmadi"
+      });
       return res.status(401).json({ 
         success: false, 
         message: "Foydalanuvchi topilmadi. Email/telefon raqamni tekshirib qaytadan urinib ko'ring." 
@@ -172,6 +200,14 @@ router.post('/login', (req, res) => {
     }
 
     if (user.password !== password) {
+      logAccess(req, {
+        action: "Tizimga kirish urinishi",
+        status: "Xatolik (Noto'g'ri parol)",
+        userEmail: user.email,
+        userName: user.name,
+        userId: user.id,
+        details: "Parol noto'g'ri kiritildi"
+      });
       return res.status(401).json({ 
         success: false, 
         message: "Kiritilgan parol noto'g'ri!" 
@@ -179,11 +215,28 @@ router.post('/login', (req, res) => {
     }
 
     if (user.status === 'blocked') {
+      logAccess(req, {
+        action: "Tizimga kirish urinishi",
+        status: "Taqiqlangan (Bloklangan)",
+        userEmail: user.email,
+        userName: user.name,
+        userId: user.id,
+        details: "Bloklangan hisob bilan kirishga urinildi"
+      });
       return res.status(403).json({ 
         success: false, 
         message: "Sizning hisobingiz administrator tomonidan bloklangan. Ma'muriyatga murojaat qiling." 
       });
     }
+
+    logAccess(req, {
+      action: "Tizimga kirish",
+      status: "Muvaffaqiyatli",
+      userEmail: user.email,
+      userName: user.name,
+      userId: user.id,
+      details: `Hisob turi: ${user.role}`
+    });
 
     res.json({
       success: true,
@@ -196,6 +249,92 @@ router.post('/login', (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ success: false, message: "Tizimga kirishda server xatosi" });
+  }
+});
+
+// 3. Kirishlar va Xavfsizlik Jurnali (Audit & Access Logs)
+router.get('/audit-logs', (req, res) => {
+  try {
+    const logs = db.get('access_logs') || [];
+    
+    // Statistika
+    const total = logs.length;
+    const successful = logs.filter(l => l.status === 'Muvaffaqiyatli').length;
+    const failed = logs.filter(l => l.status.startsWith('Xatolik') || l.status.startsWith('Taqiqlangan')).length;
+    
+    // Noyob IP lar
+    const uniqueIps = Array.from(new Set(logs.map(l => l.ip).filter(Boolean)));
+    
+    // Qurilmalar statistikasi
+    const devices = {
+      desktop: logs.filter(l => l.deviceType === 'desktop').length,
+      mobile: logs.filter(l => l.deviceType === 'mobile').length,
+      tablet: logs.filter(l => l.deviceType === 'tablet').length
+    };
+
+    res.json({
+      success: true,
+      data: {
+        logs,
+        summary: {
+          total,
+          successful,
+          failed,
+          uniqueIpsCount: uniqueIps.length,
+          uniqueIps,
+          devices,
+          lastActivity: logs[0] ? logs[0].formattedTime : null
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Fetch audit logs error:", err);
+    res.status(500).json({ success: false, message: "Audit jurnallarini olishda xatolik yuz berdi" });
+  }
+});
+
+// 4. Kirishlar jurnalini tozalash (Admin uchun)
+router.delete('/audit-logs', (req, res) => {
+  try {
+    const clearEntry = logAccess(req, {
+      action: "Xavfsizlik jurnali tozalandi",
+      status: "Ogohlantirish",
+      userName: "Administrator",
+      details: "Barcha oldingi kirish yozuvlari tozalandi"
+    });
+    
+    db.set('access_logs', clearEntry ? [clearEntry] : []);
+    
+    res.json({
+      success: true,
+      message: "Kirishlar jurnali muvaffaqiyatli tozalandi."
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Jurnalni tozalashda xatolik" });
+  }
+});
+
+// 5. Frontenddan tashrifni qayd qilish (Ekran o'lchami va platforma bilan)
+router.post('/record-visit', (req, res) => {
+  try {
+    const { userId, userName, userEmail, screenResolution, platform } = req.body || {};
+    const details = [
+      screenResolution ? `Ekran: ${screenResolution}` : null,
+      platform ? `Platforma: ${platform}` : null
+    ].filter(Boolean).join(' | ');
+
+    logAccess(req, {
+      action: userId ? "Faol Sessiya" : "Saytga tashrif",
+      status: "Tashrif",
+      userId,
+      userName: userName || "Mehmon",
+      userEmail,
+      details: details || "Web ilova ochildi"
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false });
   }
 });
 

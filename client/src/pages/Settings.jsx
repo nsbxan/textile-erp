@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function Settings() {
-  const { lang, loc, setLang, usdRate, setUsdRate, notify, refreshSignal, triggerRefresh } = useApp();
+  const { lang, loc, setLang, usdRate, setUsdRate, notify, refreshSignal, triggerRefresh, setActiveTab, isAdmin } = useApp();
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -134,13 +134,27 @@ export default function Settings() {
           </p>
         </div>
 
-        <button
-          onClick={handleDownloadBackup}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-xs cursor-pointer"
-        >
-          <Download className="w-4 h-4 text-teal-600" />
-          <span>{lang === 'cyr' ? "База Захирасини Юклаб Олиш (JSON)" : "Baza Zaxirasini Yuklab Olish (JSON)"}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('users')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/50 dark:hover:bg-teal-900/50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold shadow-xs cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4 text-teal-600" />
+              <span>🛡️ Kirishlar & Xavfsizlik Jurnali</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleDownloadBackup}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-xs cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-teal-600" />
+            <span>{lang === 'cyr' ? "База Захирасини Юклаб Олиш (JSON)" : "Baza Zaxirasini Yuklab Olish (JSON)"}</span>
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
