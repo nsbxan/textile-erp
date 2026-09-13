@@ -42,6 +42,7 @@ export function AppProvider({ children }) {
   const [printInvoiceData, setPrintInvoiceData] = useState(null);
   const [printWeavingOrderData, setPrintWeavingOrderData] = useState(null);
   const [printDyeingOrderData, setPrintDyeingOrderData] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Dark/Light rejim
   useEffect(() => {
@@ -253,6 +254,8 @@ export function AppProvider({ children }) {
         setPrintWeavingOrderData,
         printDyeingOrderData,
         setPrintDyeingOrderData,
+        mobileMenuOpen,
+        setMobileMenuOpen,
         // Auth & Permissions (RBAC)
         currentUser,
         token,

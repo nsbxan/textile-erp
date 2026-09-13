@@ -281,12 +281,12 @@ export default function UserManagement() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
           {/* Sub-tab tugmalari */}
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+          <div className="flex flex-1 sm:flex-initial items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200/60 dark:border-slate-700 w-full sm:w-auto">
             <button
               onClick={() => setActiveSubTab('users')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === 'users'
                   ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -300,7 +300,7 @@ export default function UserManagement() {
                 setActiveSubTab('audit');
                 fetchAuditLogs();
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === 'audit'
                   ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -316,7 +316,7 @@ export default function UserManagement() {
               if (activeSubTab === 'users') fetchUsers();
               else fetchAuditLogs();
             }}
-            className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all cursor-pointer"
+            className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all cursor-pointer shrink-0"
             title="Yangilash"
           >
             <RefreshCw className={`w-4 h-4 ${loading || auditLoading ? 'animate-spin' : ''}`} />
@@ -382,8 +382,123 @@ export default function UserManagement() {
             </div>
           </div>
 
-          {/* Foydalanuvchilar Jadvali */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+          {/* Mobil ekranlar uchun Foydalanuvchi Kartalari (md:hidden) */}
+          <div className="block md:hidden space-y-3">
+            {filteredUsers.length === 0 ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 text-slate-400 text-xs font-medium">
+                Foydalanuvchilar topilmadi
+              </div>
+            ) : (
+              filteredUsers.map(user => {
+                const isCurrent = user.id === currentUser?.id;
+                const isAdminUser = user.role === 'admin';
+                const userCanEdit = isAdminUser || user.canEdit;
+                const allowedCount = isAdminUser || (user.allowedTabs && user.allowedTabs.includes('*'))
+                  ? ALL_SYSTEM_TABS.length
+                  : (user.allowedTabs || []).length;
+
+                return (
+                  <div
+                    key={user.id}
+                    className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3"
+                  >
+                    {/* Foydalanuvchi Bosh qismi */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}`}
+                          alt={user.name}
+                          className="w-10 h-10 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-black text-slate-900 dark:text-white text-sm">
+                              {user.name}
+                            </span>
+                            {isCurrent && (
+                              <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 font-black border border-teal-200 dark:border-teal-800">
+                                Siz
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono">ID: {user.id}</span>
+                        </div>
+                      </div>
+
+                      {/* Amallar */}
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleOpenEdit(user)}
+                          className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-teal-600 transition-colors cursor-pointer"
+                          title="Ruxsatlar"
+                        >
+                          <Sliders className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user)}
+                          disabled={isCurrent}
+                          className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-30 cursor-pointer"
+                          title="O'chirish"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Aloqa */}
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Telefon:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{user.phone || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Email:</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-[11px] truncate block">{user.email}</span>
+                      </div>
+                    </div>
+
+                    {/* Roli va Ruxsatlar */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        {isAdminUser ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-[11px] font-black border border-amber-200 dark:border-amber-800/50">
+                            <ShieldCheck className="w-3 h-3 text-amber-500" />
+                            <span>Administrator</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-slate-700">
+                            <Users className="w-3 h-3 text-slate-400" />
+                            <span>Xodim</span>
+                          </span>
+                        )}
+
+                        <span className="px-2 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 text-[11px] font-bold border border-teal-200 dark:border-teal-800">
+                          {allowedCount}/{ALL_SYSTEM_TABS.length} bo'lim
+                        </span>
+                      </div>
+
+                      <div>
+                        {user.status === 'blocked' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[10px] font-black border border-rose-200 dark:border-rose-800">
+                            <UserX className="w-3 h-3" />
+                            <span>Bloklangan</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                            <UserCheck className="w-3 h-3" />
+                            <span>Faol</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Katta ekranlar uchun Jadval (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -642,8 +757,108 @@ export default function UserManagement() {
             </div>
           </div>
 
-          {/* Audit Logs Jadvali */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+          {/* Mobil qurilmalar uchun Qulay Karta Ko'rinishi (md:hidden) */}
+          <div className="block md:hidden space-y-3">
+            {filteredAuditLogs.length === 0 ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 text-slate-400 text-xs font-medium">
+                Kirish yozuvlari topilmadi
+              </div>
+            ) : (
+              filteredAuditLogs.map(log => {
+                const isSuccess = log.status === 'Muvaffaqiyatli';
+                const isFailed = log.status.startsWith('Xatolik') || log.status.startsWith('Taqiqlangan');
+
+                return (
+                  <div
+                    key={log.id}
+                    className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2.5"
+                  >
+                    {/* Yuqori: Foydalanuvchi va Holat */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                          log.user?.email
+                            ? 'bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}>
+                          {log.user?.name ? log.user.name.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900 dark:text-white text-xs leading-tight">
+                            {log.user?.name || "Mehmon (Tashrif)"}
+                          </div>
+                          <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
+                            {log.user?.email || "Ro'yxatdan o'tmagan"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black border shrink-0 ${
+                        isSuccess
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
+                          : isFailed
+                          ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/60'
+                          : 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800/60'
+                      }`}>
+                        {isSuccess && <Check className="w-2.5 h-2.5" />}
+                        {isFailed && <X className="w-2.5 h-2.5" />}
+                        <span>{log.status}</span>
+                      </span>
+                    </div>
+
+                    {/* O'rta: Amal va Qurilma */}
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Amal:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate block">{log.action}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Qurilma & OS:</span>
+                        <div className="flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200 text-xs">
+                          {log.deviceType === 'mobile' ? (
+                            <Smartphone className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                          ) : log.deviceType === 'tablet' ? (
+                            <Tablet className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                          ) : (
+                            <Monitor className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                          )}
+                          <span className="truncate">{log.device}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Past: IP, Vaqt va Tafsilot */}
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[10px] font-bold border border-slate-200 dark:border-slate-700">
+                        <span>{log.ip}</span>
+                        <button
+                          onClick={() => handleCopyIp(log.ip)}
+                          className="text-slate-400 hover:text-teal-600 cursor-pointer"
+                          title="Nusxalash"
+                        >
+                          {copiedIp === log.ip ? <Check className="w-2.5 h-2.5 text-emerald-500" /> : <Copy className="w-2.5 h-2.5" />}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-slate-400 text-[10px]">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        <span>{log.formattedTime || formatDate(log.timestamp)}</span>
+                      </div>
+                    </div>
+
+                    {log.details && (
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-200/50 dark:border-slate-800">
+                        {log.details}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Katta ekranlar uchun keng jadval (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>

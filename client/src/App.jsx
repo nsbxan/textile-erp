@@ -13,6 +13,7 @@ import InvoicePrintModal from './components/InvoicePrintModal';
 import WeavingOrderPrintModal from './components/WeavingOrderPrintModal';
 import DyeingOrderPrintModal from './components/DyeingOrderPrintModal';
 import NewRollModal from './components/NewRollModal';
+import MobileBottomNav from './components/MobileBottomNav';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -103,12 +104,15 @@ export default function App() {
         <Sidebar />
 
         {/* Asosiy Sahifa Kontenti */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#f8fafc] dark:bg-[#0b0f17]">
-          <div className="max-w-7xl mx-auto pb-12">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-[#f8fafc] dark:bg-[#0b0f17] pb-24 lg:pb-12">
+          <div className="max-w-7xl mx-auto">
             {renderActivePage()}
           </div>
         </main>
       </div>
+
+      {/* Mobil Qurilmalar uchun Qulay Pastki Menyu (Bottom Navigation) */}
+      <MobileBottomNav />
 
       {/* Global Modallar */}
       <ToastContainer />
