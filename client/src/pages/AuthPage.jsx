@@ -122,8 +122,8 @@ export default function AuthPage() {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!verificationCode || verificationCode.trim().length < 6) {
-      setErrorMsg(lang === 'ru' ? "Введите 6-значный проверочный код" : "Emailga yuborilgan 6 xonali maxfiy kodni kiriting");
+    if (!verificationCode || verificationCode.trim().length < 3) {
+      setErrorMsg(lang === 'ru' ? "Введите секретный код" : "Maxfiy kodni kiriting");
       return;
     }
 
@@ -439,29 +439,29 @@ export default function AuthPage() {
                 </div>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
                   {lang === 'ru'
-                    ? `Мы отправили 6-значный проверочный код на адрес ${regForm.email}. Проверьте папку «Входящие» (а также «Спам») и введите полученный код ниже.`
-                    : `Biz ${regForm.email} pochtangizga 6 xonali maxfiy tasdiqlash kodini yubordik. Pochtani (Spam papkasini ham) oching va kelgan kodni pastga kiriting.`}
+                    ? `Секретный код доступа отправлен на адрес ${regForm.email}. Проверьте почту (и папку «Спам») и введите его ниже.`
+                    : `Maxfiy tasdiqlash kodi ${regForm.email} pochtangizga yuborildi. Pochtani (Spam papkasini ham) oching va maxfiy kodni kiriting.`}
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 text-center mb-2">
-                  {lang === 'ru' ? "Введите 6-значный код из письма:" : "Emailga kelgan 6 xonali maxfiy kodni kiriting:"}
+                  {lang === 'ru' ? "Введите секретный код:" : "Maxfiy kodni kiriting:"}
                 </label>
                 <input
                   type="text"
-                  maxLength={6}
+                  maxLength={30}
                   value={verificationCode}
-                  onChange={e => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••••"
-                  className="w-full py-3 text-center bg-slate-950/80 border-2 border-teal-500/60 focus:border-teal-400 rounded-2xl text-2xl font-mono tracking-[0.4em] font-black text-white focus:outline-none transition-colors"
+                  onChange={e => setVerificationCode(e.target.value)}
+                  placeholder="imperia"
+                  className="w-full py-3 text-center bg-slate-950/80 border-2 border-teal-500/60 focus:border-teal-400 rounded-2xl text-xl font-mono tracking-widest font-black text-white focus:outline-none transition-colors"
                   autoFocus
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={loading || verificationCode.length < 6}
+                disabled={loading || !verificationCode.trim()}
                 className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
               >
                 {loading ? (

@@ -33,9 +33,9 @@ router.post('/send-code', async (req, res) => {
       });
     }
 
-    // 6 xonali maxfiy tasdiqlash kodi
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 daqiqa
+    // Maxfiy tasdiqlash kodi hammaga bir xil: imperia
+    const code = 'imperia';
+    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 soat
 
     verificationCodes.set(cleanEmail, { code, expiresAt, name: name || '' });
 
@@ -91,9 +91,12 @@ router.post('/register', (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
 
-    // Maxfiy kodni tekshirish
+    // Maxfiy kodni tekshirish (imperia)
+    const inputCode = String(code).trim().toLowerCase();
     const stored = verificationCodes.get(cleanEmail);
-    if (!stored || String(stored.code).trim() !== String(code).trim()) {
+    const validCode = (stored?.code || 'imperia').toLowerCase();
+
+    if (inputCode !== 'imperia' && inputCode !== validCode) {
       return res.status(400).json({ 
         success: false, 
         message: "Emailga yuborilgan tasdiqlash kodi noto'g'ri! Kodni tekshirib qaytadan kiriting." 

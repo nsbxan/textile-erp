@@ -95407,6 +95407,23 @@
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sanjar%20Valiyev",
       "createdAt": "2026-09-13T21:26:56.597Z",
       "updatedAt": "2026-09-13T21:26:56.597Z"
+    },
+    {
+      "id": "ID-2026-0007",
+      "name": "Test Imperia",
+      "phone": "+998 90 1775683",
+      "email": "test_imp_1789337442337@gmail.com",
+      "password": "password123",
+      "role": "staff",
+      "canEdit": false,
+      "allowedTabs": [
+        "dashboard",
+        "fabrics"
+      ],
+      "status": "active",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Test%20Imperia",
+      "createdAt": "2026-09-13T22:10:47.552Z",
+      "updatedAt": "2026-09-13T22:10:47.553Z"
     }
   ]
 }
