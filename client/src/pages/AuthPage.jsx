@@ -283,7 +283,8 @@ export default function AuthPage() {
                     value={regForm.name}
                     onChange={e => setRegForm({ ...regForm, name: e.target.value })}
                     placeholder={lang === 'ru' ? "например: Polat Alemdar" : lang === 'cyr' ? "масалан: Polat Alemdar" : "masalan: Polat Alemdar"}
-                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                    autoComplete="off"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white placeholder:text-slate-500 placeholder:italic focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>
               </div>
