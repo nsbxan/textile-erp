@@ -84,34 +84,17 @@ router.post('/register', (req, res) => {
     if (!password || password.length < 4) {
       return res.status(400).json({ success: false, message: "Parol kamida 4 ta belgidan iborat bo'lishi kerak" });
     }
-    if (!code || String(code).trim().length === 0) {
-      return res.status(400).json({ success: false, message: "Emailingizga yuborilgan tasdiqlash kodini kiriting" });
+    // Maxfiy kodni tekshirish (imperia)
+    const inputCode = String(code || '').trim().toLowerCase();
+    if (inputCode !== 'imperia') {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Kiritilgan maxfiy kod noto'g'ri! Tizimga kirish uchun to'g'ri maxfiy kodni yozing." 
+      });
     }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
-
-    // Maxfiy kodni tekshirish (imperia)
-    const inputCode = String(code).trim().toLowerCase();
-    const stored = verificationCodes.get(cleanEmail);
-    const validCode = (stored?.code || 'imperia').toLowerCase();
-
-    if (inputCode !== 'imperia' && inputCode !== validCode) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Emailga yuborilgan tasdiqlash kodi noto'g'ri! Kodni tekshirib qaytadan kiriting." 
-      });
-    }
-
-    if (Date.now() > stored.expiresAt) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Tasdiqlash kodining amal qilish muddati tugagan (10 daqiqa). Qaytadan kod oling." 
-      });
-    }
-
-    // Kod to'g'ri, xotiradan tozalaymiz
-    verificationCodes.delete(cleanEmail);
 
     // Takroriy email yoki telefonni tekshirish
     const existing = db.find('users', u => 

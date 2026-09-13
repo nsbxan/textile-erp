@@ -95424,6 +95424,23 @@
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Test%20Imperia",
       "createdAt": "2026-09-13T22:10:47.552Z",
       "updatedAt": "2026-09-13T22:10:47.553Z"
+    },
+    {
+      "id": "ID-2026-0008",
+      "name": "Xodim",
+      "phone": "+998 93 9267922",
+      "email": "emp_1789337878553@gmail.com",
+      "password": "pass",
+      "role": "staff",
+      "canEdit": false,
+      "allowedTabs": [
+        "dashboard",
+        "fabrics"
+      ],
+      "status": "active",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Xodim",
+      "createdAt": "2026-09-13T22:17:58.769Z",
+      "updatedAt": "2026-09-13T22:17:58.770Z"
     }
   ]
 }

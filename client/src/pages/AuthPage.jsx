@@ -16,7 +16,8 @@ import {
   ArrowRight,
   Globe,
   LogIn,
-  UserPlus
+  UserPlus,
+  Key
 } from 'lucide-react';
 
 export default function AuthPage() {
@@ -32,14 +33,13 @@ export default function AuthPage() {
   const [loginPass, setLoginPass] = useState('');
 
   // Register form
-  const [regStep, setRegStep] = useState('form'); // 'form' | 'code'
-  const [verificationCode, setVerificationCode] = useState('');
   const [regForm, setRegForm] = useState({
     name: '',
     phone: '+998 ',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    secretCode: ''
   });
 
   // Google Simulyatsiya Modali
@@ -69,8 +69,8 @@ export default function AuthPage() {
     }
   };
 
-  // 1-QADAM: Emailga maxfiy kod yuborish
-  const handleSendCodeSubmit = async (e) => {
+  // Ro'yxatdan o'tish (Faqat 'imperia' maxfiy kodi bilan)
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -94,36 +94,12 @@ export default function AuthPage() {
       setErrorMsg(lang === 'ru' ? "Пароли не совпадают" : "Kiritilgan parollar bir-biriga mos kelmadi");
       return;
     }
-
-    try {
-      setLoading(true);
-      const res = await api.post('/auth/send-code', {
-        email: regForm.email.trim().toLowerCase(),
-        name: regForm.name.trim()
-      });
-
-      if (res.success) {
-        setRegStep('code');
-        notify(
-          "Emailga kod yuborildi",
-          `${regForm.email} pochtangizga maxfiy tasdiqlash kodi yuborildi. Pochtani tekshiring!`,
-          'success'
-        );
-      }
-    } catch (err) {
-      setErrorMsg(err.message || "Tasdiqlash kodini yuborishda xatolik");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 2-QADAM: Maxfiy kodni tekshirib ro'yxatdan o'tishni yakunlash
-  const handleVerifyAndRegister = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-
-    if (!verificationCode || verificationCode.trim().length < 3) {
-      setErrorMsg(lang === 'ru' ? "Введите секретный код" : "Maxfiy kodni kiriting");
+    if (!regForm.secretCode || regForm.secretCode.trim().toLowerCase() !== 'imperia') {
+      setErrorMsg(
+        lang === 'ru'
+          ? "Неверный секретный код! Доступ разрешен только по секретному коду."
+          : "Maxfiy kod noto'g'ri! Tizimga kirish uchun to'g'ri maxfiy kodni yozing."
+      );
       return;
     }
 
@@ -134,10 +110,10 @@ export default function AuthPage() {
         phone: regForm.phone.trim(),
         email: regForm.email.trim().toLowerCase(),
         password: regForm.password,
-        code: verificationCode.trim()
+        code: regForm.secretCode.trim()
       });
     } catch (err) {
-      setErrorMsg(err.message || "Tasdiqlash kodi noto'g'ri");
+      setErrorMsg(err.message || "Ro'yxatdan o'tishda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
@@ -313,9 +289,9 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* 2. RO'YXATDAN O'TISH FORMASI (2 BOSQICHLI: MA'LUMOTLAR + EMAIL MAXFIY KODI) */}
-          {mode === 'register' && regStep === 'form' && (
-            <form onSubmit={handleSendCodeSubmit} className="space-y-3.5">
+          {/* 2. RO'YXATDAN O'TISH FORMASI */}
+          {mode === 'register' && (
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">
                   {lang === 'ru' ? "Ф.И.О. (Имя и Фамилия)" : lang === 'cyr' ? "Ф.И.Ш. (Исм ва Фамилия)" : "F.I.Sh. (Ism va Familiya)"}
@@ -397,100 +373,40 @@ export default function AuthPage() {
                 </div>
               </div>
 
+              {/* MAXFIY KODNI YOZING */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center justify-between">
+                  <span>{lang === 'ru' ? "Секретный код" : lang === 'cyr' ? "Махфий кодни ёзинг" : "Maxfiy kodni yozing"}</span>
+                  <span className="text-[10px] text-teal-400 font-semibold">({lang === 'ru' ? "доступ к системе" : "tizimga kirish uchun"})</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Key className="w-4 h-4 text-teal-400" />
+                  </div>
+                  <input
+                    type="password"
+                    value={regForm.secretCode}
+                    onChange={e => setRegForm({ ...regForm, secretCode: e.target.value })}
+                    placeholder={lang === 'ru' ? "Секретный код организации..." : "Maxfiy kodni yozing..."}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors font-mono tracking-wider"
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
               >
                 {loading ? (
-                  <span>{lang === 'ru' ? "Отправка кода..." : "Kod yuborilmoqda..."}</span>
+                  <span>{lang === 'ru' ? "Регистрация..." : "Ro'yxatdan o'tilmoqda..."}</span>
                 ) : (
                   <>
-                    <span>{lang === 'ru' ? "Отправить секретный код на Email" : lang === 'cyr' ? "Emailга махфий код юбориш" : "Emailga Maxfiy Kod Yuborish"}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* 2-BOSQICH: EMAIL MAXFIY KODINI KIRITISH */}
-          {mode === 'register' && regStep === 'code' && (
-            <form onSubmit={handleVerifyAndRegister} className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
-              <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-400 mx-auto flex items-center justify-center font-black">
-                  <Mail className="w-6 h-6 animate-bounce" />
-                </div>
-                <h3 className="text-base font-black text-white">
-                  {lang === 'ru' ? "Подтверждение Email" : "Emailni Tasdiqlash"}
-                </h3>
-                <p className="text-xs text-slate-400">
-                  {lang === 'ru'
-                    ? `Секретный код отправлен на ${regForm.email}:`
-                    : `Maxfiy tasdiqlash kodi ${regForm.email} manziliga yuborildi:`}
-                </p>
-              </div>
-
-              {/* Email yuborilganlik bildirishnomasi */}
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs space-y-2">
-                <div className="flex items-center gap-2 font-bold text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{lang === 'ru' ? "Секретный код отправлен на вашу почту!" : "Maxfiy tasdiqlash kodi pochtangizga yuborildi!"}</span>
-                </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  {lang === 'ru'
-                    ? `Секретный код доступа отправлен на адрес ${regForm.email}. Проверьте почту (и папку «Спам») и введите его ниже.`
-                    : `Maxfiy tasdiqlash kodi ${regForm.email} pochtangizga yuborildi. Pochtani (Spam papkasini ham) oching va maxfiy kodni kiriting.`}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-300 text-center mb-2">
-                  {lang === 'ru' ? "Введите секретный код:" : "Maxfiy kodni kiriting:"}
-                </label>
-                <input
-                  type="text"
-                  maxLength={30}
-                  value={verificationCode}
-                  onChange={e => setVerificationCode(e.target.value)}
-                  placeholder="imperia"
-                  className="w-full py-3 text-center bg-slate-950/80 border-2 border-teal-500/60 focus:border-teal-400 rounded-2xl text-xl font-mono tracking-widest font-black text-white focus:outline-none transition-colors"
-                  autoFocus
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !verificationCode.trim()}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
-              >
-                {loading ? (
-                  <span>{lang === 'ru' ? "Проверка кода..." : "Tekshirilmoqda..."}</span>
-                ) : (
-                  <>
-                    <span>{lang === 'ru' ? "Подтвердить и войти в систему" : "Kodni Tasdiqlash va Tizimga Kirish"}</span>
+                    <span>{lang === 'ru' ? "Зарегистрироваться и войти" : lang === 'cyr' ? "Рўйхатдан ўтиш ва тизимга кириш" : "Ro'yxatdan O'tish va Tizimga Kirish"}</span>
                     <CheckCircle2 className="w-4 h-4" />
                   </>
                 )}
               </button>
-
-              <div className="flex items-center justify-between text-xs pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setRegStep('form'); setErrorMsg(''); }}
-                  className="text-slate-400 hover:text-white underline cursor-pointer"
-                >
-                  ← Ma'lumotlarni o'zgartirish
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSendCodeSubmit}
-                  disabled={loading}
-                  className="text-teal-400 hover:text-teal-300 font-bold underline cursor-pointer"
-                >
-                  Kodni qayta yuborish
-                </button>
-              </div>
             </form>
           )}
 
