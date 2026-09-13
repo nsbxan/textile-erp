@@ -27,8 +27,8 @@ export default function AuthPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   // Login form
-  const [loginInput, setLoginInput] = useState('admin@textilepro.uz');
-  const [loginPass, setLoginPass] = useState('admin123');
+  const [loginInput, setLoginInput] = useState('');
+  const [loginPass, setLoginPass] = useState('');
 
   // Register form
   const [regForm, setRegForm] = useState({
@@ -228,7 +228,7 @@ export default function AuthPage() {
                     type="text"
                     value={loginInput}
                     onChange={e => setLoginInput(e.target.value)}
-                    placeholder={lang === 'ru' ? "admin@textilepro.uz или +998..." : "admin@textilepro.uz yoki +998..."}
+                    placeholder={lang === 'ru' ? "Email или телефон..." : "Email yoki telefon..."}
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>
@@ -417,26 +417,6 @@ export default function AuthPage() {
                 : (lang === 'ru' ? "Регистрация через Google" : lang === 'cyr' ? "Google орқали рўйхатдан ўтиш" : "Google orqali ro'yxatdan o'tish")}
             </span>
           </button>
-
-          {/* TEZKOR DEMO ADMINISTRATOR TUGMASI */}
-          <div className="pt-2 border-t border-slate-800/80">
-            <button
-              type="button"
-              onClick={() => {
-                setLoginInput('admin@textilepro.uz');
-                setLoginPass('admin123');
-                setMode('login');
-              }}
-              className="w-full text-center text-[11px] text-teal-400 hover:text-teal-300 font-bold flex items-center justify-center gap-1.5 py-1.5 rounded-xl hover:bg-teal-500/10 transition-colors"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-              <span>
-                {lang === 'ru'
-                  ? "Войти как Главный Администратор (admin@textilepro.uz)"
-                  : "Bosh Administrator sifatida to'ldirish (admin@textilepro.uz)"}
-              </span>
-            </button>
-          </div>
         </div>
 
         {/* Xavfsizlik va Ma'lumot */}
@@ -444,8 +424,8 @@ export default function AuthPage() {
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
           <span>
             {lang === 'ru'
-              ? "Права доступа и редактирование контролируются Администратором (RBAC)"
-              : "Tizimda tahrirlash va ko'rish huquqlari Administrator tomonidan boshqariladi"}
+              ? "Корпоративная система управления текстильным производством"
+              : "To'qimachilik korxonasini boshqarish ERP tizimi"}
           </span>
         </div>
       </div>
@@ -474,45 +454,13 @@ export default function AuthPage() {
             </div>
 
             <p className="text-xs text-slate-400">
-              TextilePro ERP tizimiga o'zingizning Google hisobingiz orqali bir bosishda kiring:
+              {lang === 'ru'
+                ? "Введите имя и адрес Gmail для входа через Google:"
+                : "Tizimga kirish uchun ismingiz va Gmail manzilingizni kiriting:"}
             </p>
 
-            {/* Tezkor Google hisoblar */}
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => handleGoogleAuth('nasibullo.textile@gmail.com', 'Nasibullo')}
-                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-left transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-500 text-white font-black text-xs flex items-center justify-center">
-                  N
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white truncate">Nasibullo (Google)</p>
-                  <p className="text-[11px] text-slate-400 truncate">nasibullo.textile@gmail.com</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleGoogleAuth('admin.director@gmail.com', 'Bosh Direktor')}
-                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-left transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white font-black text-xs flex items-center justify-center">
-                  B
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white truncate">Bosh Direktor</p>
-                  <p className="text-[11px] text-slate-400 truncate">admin.director@gmail.com</p>
-                </div>
-              </button>
-            </div>
-
-            {/* Boshqa shaxsiy Gmail kiritish */}
-            <div className="pt-2 border-t border-slate-800 space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 block">
-                Yoki o'z Google Gmail manzilingizni kiriting:
-              </label>
+            {/* Shaxsiy Gmail kiritish */}
+            <div className="space-y-3">
               <input
                 type="text"
                 value={googleCustomName}
