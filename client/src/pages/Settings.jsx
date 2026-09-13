@@ -11,7 +11,11 @@ import {
   RefreshCw,
   Printer,
   Droplets,
-  Languages
+  Languages,
+  Mail,
+  Key,
+  Send,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Settings() {
@@ -28,11 +32,18 @@ export default function Settings() {
     dyehouses: [],
     standardShrinkageTolerance: 5.0,
     receiptFooter: '',
-    labelPrinterSize: '58mm'
+    labelPrinterSize: '58mm',
+    smtp: {
+      user: '',
+      pass: '',
+      host: 'smtp.gmail.com',
+      port: 465
+    }
   });
 
   const [newDyehouseInput, setNewDyehouseInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [testingEmail, setTestingEmail] = useState(false);
 
   useEffect(() => {
     api.get('/settings')
@@ -81,6 +92,30 @@ export default function Settings() {
 
   const handleDownloadBackup = () => {
     window.open('http://localhost:5000/api/settings/backup', '_blank');
+  };
+
+  const handleTestEmail = async () => {
+    const targetEmail = formData.smtp?.user || formData.email;
+    if (!targetEmail) {
+      notify("Xatolik", "Avval Gmail manzilingizni kiriting", "error");
+      return;
+    }
+    if (!formData.smtp?.pass) {
+      notify("Xatolik", "Google App Password (16 xonali maxfiy parol) kiriting", "error");
+      return;
+    }
+
+    try {
+      setTestingEmail(true);
+      // Avval sozlamalarni saqlaymiz
+      await api.post('/settings', formData);
+      const res = await api.post('/settings/test-email', { email: targetEmail });
+      notify("Muvaffaqiyatli", res.message, "success");
+    } catch (err) {
+      notify("Email xatosi", err.message || "Email yuborishda xatolik yuz berdi", "error");
+    } finally {
+      setTestingEmail(false);
+    }
   };
 
   return (
@@ -268,6 +303,85 @@ export default function Settings() {
                 className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
+          </div>
+        </div>
+
+        {/* 4. Email Xabarnomalar & SMTP (Gmail) Sozlamalari */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <div className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                {lang === 'cyr' ? "Email Хабарномалар & SMTP (Gmail) Созламалари" : "Email Xabarnomalar & SMTP (Gmail) Sozlamalari"}
+              </h3>
+            </div>
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+              {formData.smtp?.user ? "Sozlangan" : "Sozlanmagan"}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-slate-600 dark:text-slate-300 space-y-1 leading-relaxed">
+            <p className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" />
+              Gmail orqali foydalanuvchilar emailiga haqiqiy tasdiqlash kodi yuborish:
+            </p>
+            <p className="text-[11px]">
+              1. Google hisobingizda <b>2 bosqichli tekshirish</b> (2-Step Verification) ni yoqing.<br/>
+              2. <b>Google Hisob &gt; Xavfsizlik &gt; Ilova parollari (App Passwords)</b> bo'limiga kirib yangi 16 xonali parol oling.<br/>
+              3. Olingan 16 xonali maxsus parolni pastdagi <b>«Google App Password»</b> katagiga kiriting.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                {lang === 'cyr' ? "Юборувчи Gmail / Email" : "Yuboruvchi Gmail / Email"}
+              </label>
+              <input
+                type="email"
+                placeholder="masalan: textile.erp.uz@gmail.com"
+                value={formData.smtp?.user || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  smtp: { ...(formData.smtp || {}), user: e.target.value }
+                })}
+                className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                {lang === 'cyr' ? "Google App Password (16 хонали парол)" : "Google App Password (16 xonali maxfiy parol)"}
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="•••• •••• •••• ••••"
+                  value={formData.smtp?.pass || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    smtp: { ...(formData.smtp || {}), pass: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 text-xs font-mono font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+                <Key className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <span className="text-[11px] text-slate-400">
+              Standart server: <b>smtp.gmail.com</b>, Port: <b>465 (SSL)</b>
+            </span>
+            <button
+              type="button"
+              onClick={handleTestEmail}
+              disabled={testingEmail}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-xs font-bold cursor-pointer transition-all disabled:opacity-50"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{testingEmail ? "Xat yuborilmoqda..." : "Test xatini yuborish va tekshirish"}</span>
+            </button>
           </div>
         </div>
 

@@ -105,14 +105,24 @@ export default function AuthPage() {
       if (res.success) {
         setIncomingEmailNotice({
           email: regForm.email.trim().toLowerCase(),
-          code: res.code
+          code: res.code,
+          emailSent: res.emailSent,
+          reason: res.reason
         });
         setRegStep('code');
-        notify(
-          "Emailga kod yuborildi",
-          `${regForm.email} manziliga 6 xonali maxfiy tasdiqlash kodi yuborildi`,
-          'success'
-        );
+        if (res.emailSent) {
+          notify(
+            "Emailga kod yuborildi",
+            `${regForm.email} pochtangizga maxfiy tasdiqlash kodi yuborildi. Pochtani tekshiring!`,
+            'success'
+          );
+        } else {
+          notify(
+            "Tasdiqlash kodi yaratildi",
+            `Maxfiy kod ekranda va server konsolida ko'rsatildi`,
+            'info'
+          );
+        }
       }
     } catch (err) {
       setErrorMsg(err.message || "Tasdiqlash kodini yuborishda xatolik");
@@ -435,26 +445,45 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {/* Kelgan xabar simulyatsiyasi */}
+              {/* Kelgan xabar holati */}
               {incomingEmailNotice && (
-                <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-teal-400" />
-                      Email bildirishnomasi:
-                    </span>
-                    <span className="font-mono font-black text-sm px-2 py-0.5 rounded-lg bg-teal-500/20 text-teal-200 border border-teal-500/40">
-                      {incomingEmailNotice.code}
-                    </span>
+                incomingEmailNotice.emailSent ? (
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs space-y-1.5">
+                    <div className="flex items-center gap-2 font-bold text-emerald-400">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{lang === 'ru' ? "Код отправлен на вашу почту!" : "Tasdiqlash kodi emailingizga yuborildi!"}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      {lang === 'ru'
+                        ? `Проверьте входящие сообщения (и папку «Спам») на адресе ${incomingEmailNotice.email} и введите 6-значный код ниже.`
+                        : `${incomingEmailNotice.email} pochtangizni oching (agar xat ko'rinmasa Spam papkasini ham tekshiring) va kelgan 6 xonali kodni pastga kiriting.`}
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setVerificationCode(incomingEmailNotice.code)}
-                    className="text-[11px] text-teal-400 hover:text-teal-200 underline font-black block cursor-pointer"
-                  >
-                    Kodni bitta bosishda kiritish ({incomingEmailNotice.code})
-                  </button>
-                </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold flex items-center gap-1.5 text-amber-300">
+                        <Mail className="w-4 h-4 text-amber-400 shrink-0" />
+                        {lang === 'ru' ? "Демо-код подтверждения:" : "Demo tasdiqlash kodi:"}
+                      </span>
+                      <span className="font-mono font-black text-sm px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-100 border border-amber-500/40">
+                        {incomingEmailNotice.code}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      {lang === 'ru'
+                        ? "SMTP почтовый сервер еще не подключен в .env, поэтому код показан здесь для продолжения."
+                        : "Serverda hali haqiqiy Gmail SMTP (App Password) ulanmaganligi sababli kod to'xtab qolmaslik uchun shu yerda berildi."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setVerificationCode(incomingEmailNotice.code)}
+                      className="text-[11px] text-amber-400 hover:text-amber-200 underline font-black block cursor-pointer"
+                    >
+                      {lang === 'ru' ? `Вставить код автоматически (${incomingEmailNotice.code})` : `Kodni avtomatik kiritish (${incomingEmailNotice.code})`}
+                    </button>
+                  </div>
+                )
               )}
 
               <div>

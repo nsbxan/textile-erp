@@ -1,5 +1,6 @@
 import express from 'express';
 import { db } from '../db.js';
+import { sendVerificationEmail, getSmtpConfig } from '../emailHelper.js';
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ function sanitizeUser(user) {
 const verificationCodes = new Map();
 
 // 1. Emailga tasdiqlash kodi yuborish
-router.post('/send-code', (req, res) => {
+router.post('/send-code', async (req, res) => {
   try {
     const { email, name } = req.body;
     if (!email || !email.trim() || !email.includes('@')) {
@@ -42,11 +43,28 @@ router.post('/send-code', (req, res) => {
     console.log(`📨 [EMAIL TASDIQLASH KODI] Manzil: ${cleanEmail} | Kod: ${code}`);
     console.log(`====================================================`);
 
-    res.json({
-      success: true,
-      message: `Tasdiqlash kodi ${cleanEmail} emailiga yuborildi`,
-      code: code // Foydalanuvchiga qulay bo'lishi uchun xabar sifatida beriladi
+    // Haqiqiy pochtaga yuborishga urinish
+    const mailRes = await sendVerificationEmail({ 
+      to: cleanEmail, 
+      name: name || '', 
+      code 
     });
+
+    if (mailRes.emailSent) {
+      res.json({
+        success: true,
+        emailSent: true,
+        message: `Maxfiy tasdiqlash kodi ${cleanEmail} emailiga yuborildi! Pochtani (Spam papkasini ham) tekshiring.`
+      });
+    } else {
+      res.json({
+        success: true,
+        emailSent: false,
+        reason: mailRes.reason || mailRes.error,
+        code: code, // SMTP sozlanmagan bo'lsa tizim to'xtab qolmasligi uchun ekranda ko'rsatiladi
+        message: `Pochta xizmati (SMTP) hali to'liq ulanmagan. Kod ekranda ko'rsatildi.`
+      });
+    }
   } catch (err) {
     console.error("Send code error:", err);
     res.status(500).json({ success: false, message: "Kodni yuborishda xatolik yuz berdi" });

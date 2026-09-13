@@ -34,4 +34,41 @@ router.get('/backup', (req, res) => {
   res.send(JSON.stringify(db.cache, null, 2));
 });
 
+// 5. Test Email yuborish (SMTP sozlamasini tekshirish)
+router.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const settings = db.getSettings();
+    const targetEmail = email || settings.smtp?.user || settings.email;
+
+    if (!targetEmail) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Test xatini qaysi emailga yuborish kerakligini kiriting" 
+      });
+    }
+
+    const { sendVerificationEmail } = await import('../emailHelper.js');
+    const result = await sendVerificationEmail({
+      to: targetEmail,
+      name: "Administrator",
+      code: Math.floor(100000 + Math.random() * 900000).toString()
+    });
+
+    if (result.emailSent) {
+      res.json({
+        success: true,
+        message: `Test tasdiqlash xati ${targetEmail} pochtasiga muvaffaqiyatli yuborildi! Pochtani tekshiring.`
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Email yuborilmadi: ${result.error || result.reason || 'Noma\'lum xatolik'}`
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: `Email xatosi: ${err.message}` });
+  }
+});
+
 export default router;
