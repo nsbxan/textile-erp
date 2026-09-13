@@ -95309,7 +95309,7 @@
   "users": [
     {
       "id": "USR-ADMIN-01",
-      "name": "Polat Alemdar",
+      "name": "Nasibullo",
       "email": "nsbxan@gmail.com",
       "phone": "+998 90 123 45 67",
       "password": "admin",
@@ -95319,7 +95319,7 @@
         "*"
       ],
       "status": "active",
-      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Polat%20Alemdar",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Nasibullo",
       "createdAt": "2026-09-13T22:30:48.971Z"
     }
   ],
