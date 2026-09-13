@@ -31,6 +31,9 @@ export default function AuthPage() {
   const [loginPass, setLoginPass] = useState('');
 
   // Register form
+  const [regStep, setRegStep] = useState('form'); // 'form' | 'code'
+  const [verificationCode, setVerificationCode] = useState('');
+  const [incomingEmailNotice, setIncomingEmailNotice] = useState(null);
   const [regForm, setRegForm] = useState({
     name: '',
     phone: '+998 ',
@@ -66,7 +69,8 @@ export default function AuthPage() {
     }
   };
 
-  const handleRegisterSubmit = async (e) => {
+  // 1-QADAM: Emailga maxfiy kod yuborish
+  const handleSendCodeSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -93,14 +97,51 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
+      const res = await api.post('/auth/send-code', {
+        email: regForm.email.trim().toLowerCase(),
+        name: regForm.name.trim()
+      });
+
+      if (res.success) {
+        setIncomingEmailNotice({
+          email: regForm.email.trim().toLowerCase(),
+          code: res.code
+        });
+        setRegStep('code');
+        notify(
+          "Emailga kod yuborildi",
+          `${regForm.email} manziliga 6 xonali maxfiy tasdiqlash kodi yuborildi`,
+          'success'
+        );
+      }
+    } catch (err) {
+      setErrorMsg(err.message || "Tasdiqlash kodini yuborishda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2-QADAM: Maxfiy kodni tekshirib ro'yxatdan o'tishni yakunlash
+  const handleVerifyAndRegister = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!verificationCode || verificationCode.trim().length < 6) {
+      setErrorMsg(lang === 'ru' ? "Введите 6-значный проверочный код" : "Emailga yuborilgan 6 xonali maxfiy kodni kiriting");
+      return;
+    }
+
+    try {
+      setLoading(true);
       await register({
         name: regForm.name.trim(),
         phone: regForm.phone.trim(),
         email: regForm.email.trim().toLowerCase(),
-        password: regForm.password
+        password: regForm.password,
+        code: verificationCode.trim()
       });
     } catch (err) {
-      setErrorMsg(err.message || "Ro'yxatdan o'tishda xatolik yuz berdi");
+      setErrorMsg(err.message || "Tasdiqlash kodi noto'g'ri");
     } finally {
       setLoading(false);
     }
@@ -276,9 +317,9 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* 2. RO'YXATDAN O'TISH FORMASI */}
-          {mode === 'register' && (
-            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+          {/* 2. RO'YXATDAN O'TISH FORMASI (2 BOSQICHLI: MA'LUMOTLAR + EMAIL MAXFIY KODI) */}
+          {mode === 'register' && regStep === 'form' && (
+            <form onSubmit={handleSendCodeSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">
                   {lang === 'ru' ? "Ф.И.О. (Имя и Фамилия)" : lang === 'cyr' ? "Ф.И.Ш. (Исм ва Фамилия)" : "F.I.Sh. (Ism va Familiya)"}
@@ -366,14 +407,103 @@ export default function AuthPage() {
                 className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
               >
                 {loading ? (
-                  <span>{lang === 'ru' ? "Создание аккаунта..." : "Yaratilmoqda..."}</span>
+                  <span>{lang === 'ru' ? "Отправка кода..." : "Kod yuborilmoqda..."}</span>
                 ) : (
                   <>
-                    <span>{lang === 'ru' ? "Зарегистрироваться" : lang === 'cyr' ? "Рўйхатдан ўтиш" : "Ro'yxatdan o'tish"}</span>
+                    <span>{lang === 'ru' ? "Отправить секретный код на Email" : lang === 'cyr' ? "Emailга махфий код юбориш" : "Emailga Maxfiy Kod Yuborish"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* 2-BOSQICH: EMAIL MAXFIY KODINI KIRITISH */}
+          {mode === 'register' && regStep === 'code' && (
+            <form onSubmit={handleVerifyAndRegister} className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
+              <div className="text-center space-y-1">
+                <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-400 mx-auto flex items-center justify-center font-black">
+                  <Mail className="w-6 h-6 animate-bounce" />
+                </div>
+                <h3 className="text-base font-black text-white">
+                  {lang === 'ru' ? "Подтверждение Email" : "Emailni Tasdiqlash"}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {lang === 'ru'
+                    ? `Секретный код отправлен на ${regForm.email}:`
+                    : `Maxfiy tasdiqlash kodi ${regForm.email} manziliga yuborildi:`}
+                </p>
+              </div>
+
+              {/* Kelgan xabar simulyatsiyasi */}
+              {incomingEmailNotice && (
+                <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-teal-400" />
+                      Email bildirishnomasi:
+                    </span>
+                    <span className="font-mono font-black text-sm px-2 py-0.5 rounded-lg bg-teal-500/20 text-teal-200 border border-teal-500/40">
+                      {incomingEmailNotice.code}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVerificationCode(incomingEmailNotice.code)}
+                    className="text-[11px] text-teal-400 hover:text-teal-200 underline font-black block cursor-pointer"
+                  >
+                    Kodni bitta bosishda kiritish ({incomingEmailNotice.code})
+                  </button>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 text-center mb-2">
+                  {lang === 'ru' ? "Введите 6-значный код из письма:" : "Emailga kelgan 6 xonali maxfiy kodni kiriting:"}
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={verificationCode}
+                  onChange={e => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••••"
+                  className="w-full py-3 text-center bg-slate-950/80 border-2 border-teal-500/60 focus:border-teal-400 rounded-2xl text-2xl font-mono tracking-[0.4em] font-black text-white focus:outline-none transition-colors"
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || verificationCode.length < 6}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+              >
+                {loading ? (
+                  <span>{lang === 'ru' ? "Проверка кода..." : "Tekshirilmoqda..."}</span>
+                ) : (
+                  <>
+                    <span>{lang === 'ru' ? "Подтвердить и войти в систему" : "Kodni Tasdiqlash va Tizimga Kirish"}</span>
                     <CheckCircle2 className="w-4 h-4" />
                   </>
                 )}
               </button>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setRegStep('form'); setErrorMsg(''); }}
+                  className="text-slate-400 hover:text-white underline cursor-pointer"
+                >
+                  ← Ma'lumotlarni o'zgartirish
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendCodeSubmit}
+                  disabled={loading}
+                  className="text-teal-400 hover:text-teal-300 font-bold underline cursor-pointer"
+                >
+                  Kodni qayta yuborish
+                </button>
+              </div>
             </form>
           )}
 

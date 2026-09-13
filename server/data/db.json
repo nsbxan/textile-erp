@@ -95373,6 +95373,23 @@
       "authProvider": "google",
       "createdAt": "2026-09-13T19:17:26.044Z",
       "updatedAt": "2026-09-13T19:17:26.044Z"
+    },
+    {
+      "id": "ID-2026-0005",
+      "name": "Sanjar Valiyev",
+      "phone": "+998 91 123 45 67",
+      "email": "operator_1789334319287@gmail.com",
+      "password": "secretpassword",
+      "role": "staff",
+      "canEdit": false,
+      "allowedTabs": [
+        "dashboard",
+        "fabrics"
+      ],
+      "status": "active",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Sanjar%20Valiyev",
+      "createdAt": "2026-09-13T21:18:39.746Z",
+      "updatedAt": "2026-09-13T21:18:39.746Z"
     }
   ]
 }

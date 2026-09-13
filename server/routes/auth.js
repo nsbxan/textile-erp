@@ -10,10 +10,53 @@ function sanitizeUser(user) {
   return safeUser;
 }
 
-// 1. Yangi foydalanuvchini ro'yxatdan o'tkazish
+// Xotirada saqlanadigan email tasdiqlash kodlari (email -> { code, expiresAt })
+const verificationCodes = new Map();
+
+// 1. Emailga tasdiqlash kodi yuborish
+router.post('/send-code', (req, res) => {
+  try {
+    const { email, name } = req.body;
+    if (!email || !email.trim() || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: "To'g'ri email manzil kiriting" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Takroriy email tekshirish
+    const existing = db.find('users', u => (u.email || '').toLowerCase() === cleanEmail);
+    if (existing.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Ushbu email allaqachon ro'yxatdan o'tgan. Tizimga kiring." 
+      });
+    }
+
+    // 6 xonali maxfiy tasdiqlash kodi
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 daqiqa
+
+    verificationCodes.set(cleanEmail, { code, expiresAt, name: name || '' });
+
+    console.log(`====================================================`);
+    console.log(`📨 [EMAIL TASDIQLASH KODI] Manzil: ${cleanEmail} | Kod: ${code}`);
+    console.log(`====================================================`);
+
+    res.json({
+      success: true,
+      message: `Tasdiqlash kodi ${cleanEmail} emailiga yuborildi`,
+      code: code // Foydalanuvchiga qulay bo'lishi uchun xabar sifatida beriladi
+    });
+  } catch (err) {
+    console.error("Send code error:", err);
+    res.status(500).json({ success: false, message: "Kodni yuborishda xatolik yuz berdi" });
+  }
+});
+
+// 2. Yangi foydalanuvchini ro'yxatdan o'tkazish (Faqat to'g'ri kod bilan)
 router.post('/register', (req, res) => {
   try {
-    const { name, phone, email, password } = req.body;
+    const { name, phone, email, password, code } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: "Ism-sharifingizni kiriting" });
@@ -27,9 +70,31 @@ router.post('/register', (req, res) => {
     if (!password || password.length < 4) {
       return res.status(400).json({ success: false, message: "Parol kamida 4 ta belgidan iborat bo'lishi kerak" });
     }
+    if (!code || String(code).trim().length === 0) {
+      return res.status(400).json({ success: false, message: "Emailingizga yuborilgan tasdiqlash kodini kiriting" });
+    }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
+
+    // Maxfiy kodni tekshirish
+    const stored = verificationCodes.get(cleanEmail);
+    if (!stored || String(stored.code).trim() !== String(code).trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Emailga yuborilgan tasdiqlash kodi noto'g'ri! Kodni tekshirib qaytadan kiriting." 
+      });
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Tasdiqlash kodining amal qilish muddati tugagan (10 daqiqa). Qaytadan kod oling." 
+      });
+    }
+
+    // Kod to'g'ri, xotiradan tozalaymiz
+    verificationCodes.delete(cleanEmail);
 
     // Takroriy email yoki telefonni tekshirish
     const existing = db.find('users', u => 
