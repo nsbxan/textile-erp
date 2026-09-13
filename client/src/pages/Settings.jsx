@@ -315,8 +315,12 @@ export default function Settings() {
                 {lang === 'cyr' ? "Email Хабарномалар & SMTP (Gmail) Созламалари" : "Email Xabarnomalar & SMTP (Gmail) Sozlamalari"}
               </h3>
             </div>
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-              {formData.smtp?.user ? "Sozlangan" : "Sozlanmagan"}
+            <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
+              formData.smtp?.isConfigured || formData.smtp?.user
+                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800"
+            }`}>
+              {formData.smtp?.isConfigured || formData.smtp?.user ? "✅ Faol va Sozlangan" : "Sozlanmagan"}
             </span>
           </div>
 

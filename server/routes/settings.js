@@ -1,17 +1,71 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { db } from '../db.js';
+import { getSmtpConfig } from '../emailHelper.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
 // 1. Sozlamalarni olish
 router.get('/', (req, res) => {
   const settings = db.getSettings();
-  res.json({ success: true, data: settings });
+  const smtp = getSmtpConfig();
+  res.json({ 
+    success: true, 
+    data: {
+      ...settings,
+      smtp: {
+        user: smtp.user || '',
+        pass: smtp.pass ? '••••••••••••••••' : '',
+        host: smtp.host || 'smtp.gmail.com',
+        port: smtp.port || 465,
+        isConfigured: smtp.isConfigured
+      }
+    } 
+  });
 });
 
 // 2. Sozlamalarni saqlash
 router.post('/', (req, res) => {
-  const updated = db.updateSettings(req.body);
+  const { smtp, ...restSettings } = req.body;
+
+  // Agar yangi SMTP ma'lumotlari kiritilgan bo'lsa
+  if (smtp && smtp.user) {
+    const cleanUser = smtp.user.trim();
+    process.env.SMTP_USER = cleanUser;
+
+    let cleanPass = process.env.SMTP_PASS || '';
+    if (smtp.pass && !smtp.pass.includes('•••')) {
+      cleanPass = smtp.pass.trim().replace(/\s+/g, '');
+      process.env.SMTP_PASS = cleanPass;
+    }
+
+    // .env fayllariga yangilab qo'yish
+    const envContent = `# Textile ERP Server Environment Variables
+PORT=5000
+
+# ==========================================
+# EMAIL YUBORISH (SMTP - Gmail yoki boshqa pochta)
+# ==========================================
+SMTP_HOST=${smtp.host || 'smtp.gmail.com'}
+SMTP_PORT=${smtp.port || 465}
+SMTP_USER=${cleanUser}
+SMTP_PASS=${cleanPass}
+SMTP_FROM_NAME="Textile ERP Tizimi"
+`;
+    try {
+      fs.writeFileSync(path.join(__dirname, '../.env'), envContent);
+      fs.writeFileSync(path.join(__dirname, '../../.env'), envContent);
+    } catch (e) {
+      console.error("Error writing .env:", e);
+    }
+  }
+
+  const updated = db.updateSettings(restSettings);
   res.json({ success: true, data: updated, message: "Sozlamalar muvaffaqiyatli saqlandi" });
 });
 
